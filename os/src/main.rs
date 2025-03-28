@@ -17,8 +17,10 @@ global_asm!(include_str!("link_app.S"));
 #[unsafe(no_mangle)]
 pub fn rust_main() -> ! {
     clear_bss();
-    println!("Hello, world!");
-    panic!("Shutdown machine!");
+    println!("[kernel] Hello, world!");
+    trap::init();
+    batch::init();
+    batch::run_next_app();
 }
 
 fn clear_bss() {
