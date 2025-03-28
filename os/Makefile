@@ -31,6 +31,9 @@ kernel:
 $(KERNEL_BIN):
 	@$(OBJCOPY) $(KERNEL_ELF) --strip-all -O binary $@
 
+clean:
+	@cargo clean
+
 QEMU_ARGS := -machine virt \
              			 -nographic \
              			 -bios $(BOOTLOADER) \
