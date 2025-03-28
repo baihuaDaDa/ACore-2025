@@ -5,9 +5,14 @@ mod lang_items;
 mod sbi;
 #[macro_use]
 mod console;
+mod sync;
+mod trap;
+mod batch;
+mod syscall;
 
 use core::arch::global_asm;
 global_asm!(include_str!("entry.asm"));
+global_asm!(include_str!("link_app.S"));
 
 #[unsafe(no_mangle)]
 pub fn rust_main() -> ! {
