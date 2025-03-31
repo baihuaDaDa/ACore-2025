@@ -5,7 +5,7 @@ use riscv::register::{
     stval, stvec
 };
 use crate::syscall::syscall;
-use crate::batch::run_next_app;
+use crate::loader::run_next_app;
 
 mod context;
 
