@@ -34,6 +34,11 @@ $(KERNEL_BIN):
 clean:
 	@cargo clean
 
+clean-user:
+	@cd ../user && make clean
+
+clean-all: clean clean-user
+
 QEMU_ARGS := -machine virt \
              			 -nographic \
              			 -bios $(BOOTLOADER) \
