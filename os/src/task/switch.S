@@ -11,7 +11,7 @@
     .global __switch
 __switch:
     sd sp, 8(a0)
-    sd ra, 0(ao)
+    sd ra, 0(a0)
     .set n, 0
     .rept 12
         SAVE_SN %n
