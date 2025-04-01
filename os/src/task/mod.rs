@@ -8,7 +8,7 @@ use crate::loader::{get_num_app, init_app_cx};
 use crate::sync::UPSafeCell;
 use crate::sbi::shutdown;
 use switch::__switch;
-use context::TaskContext;
+pub use context::TaskContext;
 use task::{TaskControlBlock, TaskStatus};
 
 pub struct TaskManager {
@@ -16,7 +16,7 @@ pub struct TaskManager {
     inner: UPSafeCell<TaskManagerInner>,
 }
 
-struct TaskManagerInner {
+pub struct TaskManagerInner {
     tasks: [TaskControlBlock; MAX_APP_NUM],
     current_task: usize,
 }
@@ -61,7 +61,7 @@ impl TaskManager {
         let inner = self.inner.exclusive_access();
         let current = inner.current_task;
         (current + 1..current + self.num_app + 1)
-            .map(|id| id % self.num_app + 1)
+            .map(|id| id % self.num_app)
             .find(|id| {
                 inner.tasks[*id].task_status == TaskStatus::Ready
             })
