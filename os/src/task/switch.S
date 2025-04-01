@@ -8,7 +8,7 @@
 .endm
 
     .section .text
-    .global __switch
+    .globl __switch
 __switch:
     sd sp, 8(a0)
     sd ra, 0(a0)

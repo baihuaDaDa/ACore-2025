@@ -1,4 +1,5 @@
 #[derive(Copy, Clone)]
+#[repr(C)]
 pub struct TaskContext {
     ra: usize,
     sp: usize,

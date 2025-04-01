@@ -26,7 +26,7 @@ fn insert_app_data() -> Result<()> {
         r#"
     .align 3
     .section .data
-    .global _num_app
+    .globl _num_app
 _num_app:
     .quad {}"#,
         apps.len()
@@ -43,8 +43,8 @@ _num_app:
             f,
             r#"
     .section .data
-    .global app_{0}_start
-    .global app_{0}_end
+    .globl app_{0}_start
+    .globl app_{0}_end
 app_{0}_start:
     .incbin "{2}{1}.bin"
 app_{0}_end:"#,

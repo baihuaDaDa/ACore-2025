@@ -14,7 +14,7 @@ pub use context::TrapContext;
 global_asm!(include_str!("trap.S"));
 
 pub fn init() {
-    unsafe extern "C" { fn __alltraps(); }
+    unsafe extern "C" { safe fn __alltraps(); }
     unsafe {
         stvec::write(__alltraps as usize, TrapMode::Direct);
     }
