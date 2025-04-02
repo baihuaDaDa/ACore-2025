@@ -1,6 +1,9 @@
 #![no_main]
 #![no_std]
 
+#[path = "boards/qemu.rs"]
+mod board;
+
 mod lang_items;
 mod sbi;
 #[macro_use]
@@ -11,6 +14,7 @@ mod loader;
 mod syscall;
 mod config;
 mod task;
+mod timer;
 
 use core::arch::global_asm;
 global_asm!(include_str!("entry.asm"));
@@ -22,6 +26,7 @@ pub fn rust_main() -> ! {
     println!("[kernel] Hello, world!");
     trap::init();
     loader::load_apps();
+    timer::set_next_trigger();
     task::run_first_task();
     panic!("Unreachable in rust_main!");
 }
