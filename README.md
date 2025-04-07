@@ -3,18 +3,18 @@ ACore-2025
 
 ## Overview
 
-## Standard
+## TODO
 
 - Bootloader
   - [ ] Initialization
   - [ ] Entering S mode for the kernel
 - Allocator
   - [ ] Buddy allocator
-  - [ ] Frame allocator (or any fine-grained allocator for any size of memory)
+  - [x] Frame allocator (or any fine-grained allocator for any size of memory)
   - [ ] SLAB (Optional)
 - Page table
-  - [ ] For kernel
-  - [ ] For each user process
+  - [x] For kernel
+  - [x] For each user process
 - Console
   - [x] Read
   - [x] Write

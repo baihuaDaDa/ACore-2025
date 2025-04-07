@@ -1,5 +1,10 @@
 #![no_main]
 #![no_std]
+#![feature(alloc_error_handler)]
+
+#[macro_use]
+extern crate bitflags;
+extern crate alloc;
 
 #[path = "boards/qemu.rs"]
 mod board;
@@ -15,6 +20,7 @@ mod syscall;
 mod config;
 mod task;
 mod timer;
+mod mm;
 
 use core::arch::global_asm;
 global_asm!(include_str!("entry.asm"));
@@ -25,7 +31,7 @@ pub fn rust_main() -> ! {
     clear_bss();
     println!("[kernel] Hello, world!");
     trap::init();
-    loader::load_apps();
+    mm::init();
     timer::set_next_trigger();
     task::run_first_task();
     panic!("Unreachable in rust_main!");
