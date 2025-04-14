@@ -118,7 +118,7 @@ unsafe extern "C" {
     fn erodata();
     fn sdata();
     fn edata();
-    fn sbss();
+    fn sbss_with_stack();
     fn ebss();
     fn ekernel();
     fn strampoline();
@@ -137,7 +137,7 @@ impl MemorySet {
         }
     }
 
-    pub fn push(&mut self, mut map_area: MapArea, data: Option<&[u8]>) {
+    fn push(&mut self, mut map_area: MapArea, data: Option<&[u8]>) {
         map_area.map(&mut self.page_table);
         if let Some(data) = data {
             map_area.copy_data(&self.page_table, data);
@@ -166,8 +166,8 @@ impl MemorySet {
         println!(".text [{:#x}, {:#x})", stext as usize, etext as usize);
         println!(".rodata [{:#x}, {:#x})", srodata as usize, erodata as usize);
         println!(".data [{:#x}, {:#x})", sdata as usize, edata as usize);
-        println!(".bss [{:#x}, {:#x})", sbss as usize, ebss as usize);
-        println!("mappint .text section");
+        println!(".bss [{:#x}, {:#x})", sbss_with_stack as usize, ebss as usize);
+        println!("mapping .text section");
         memory_set.push(MapArea::new(
             (stext as usize).into(),
             (etext as usize).into(),
@@ -190,7 +190,7 @@ impl MemorySet {
         ), None);
         println!("mapping .bss section");
         memory_set.push(MapArea::new(
-            (sbss as usize).into(),
+            (sbss_with_stack as usize).into(),
             (ebss as usize).into(),
             MapType::Identical,
             MapPermission::R | MapPermission::W,

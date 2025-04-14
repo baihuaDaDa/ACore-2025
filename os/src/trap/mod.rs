@@ -75,7 +75,9 @@ pub fn trap_handler() -> ! {
             cx.x[10] = syscall(cx.x[17], [cx.x[10], cx.x[11], cx.x[12]]) as usize;
         }
         Trap::Exception(Exception::StoreFault) |
-        Trap::Exception(Exception::StorePageFault) => {
+        Trap::Exception(Exception::StorePageFault) |
+        Trap::Exception(Exception::LoadFault) |
+        Trap::Exception(Exception::LoadPageFault) => {
             println!(
                 "[kernel] PageFault in application, bad addr = {:#x}, bad instruction = {:#x}, kernel killed it.",
                 stval, cx.sepc
@@ -87,7 +89,7 @@ pub fn trap_handler() -> ! {
             exit_current_and_run_next();
         }
         Trap::Interrupt(Interrupt::SupervisorTimer) => {
-            println!("[kernel] Timer interrupt!");
+            // println!("[kernel] Timer interrupt!");
             set_next_trigger();
             suspend_current_and_run_next();
         }

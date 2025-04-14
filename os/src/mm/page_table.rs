@@ -1,7 +1,6 @@
 use alloc::vec;
 use alloc::vec::Vec;
 use bitflags::*;
-use riscv::register::fcsr::Flag;
 use crate::mm::address::{PhysPageNum, StepByOne, VirtPageNum};
 use crate::mm::frame_allocator::{frame_alloc, FrameTracker};
 use crate::mm::VirtAddr;
