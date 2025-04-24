@@ -25,14 +25,14 @@ ACore-2025
   - [ ] User -> User
 - Process
   - Process loading
-    - [ ] ELF parsing
-    - [ ] Sections loading (ref to page table)
+    - [x] ELF parsing
+    - [x] Sections loading (ref to page table)
   - Syscall
-    - [ ] Kick off a new process (Something like fork and exec)
+    - [x] Kick off a new process (Something like fork and exec)
     - [ ] Wait for child processes (Something like wait)
     - [ ] Exit from a process (Something like exit)
   - Process manager
-    - [ ] Process creation
+    - [x] Process creation
     - [ ] Process termination
   - Scheduler
     - [x] Context switch

@@ -66,27 +66,31 @@ pub fn trap_return() -> ! {
 #[unsafe(no_mangle)]
 pub fn trap_handler() -> ! {
     set_kernel_trap_entry();
-    let cx= current_trap_cx();
+    let mut cx = current_trap_cx();
     let scause = scause::read();
     let stval = stval::read();
     match scause.cause() {
         Trap::Exception(Exception::UserEnvCall) => {
             cx.sepc += 4;
-            cx.x[10] = syscall(cx.x[17], [cx.x[10], cx.x[11], cx.x[12]]) as usize;
+            let result = syscall(cx.x[17], [cx.x[10], cx.x[11], cx.x[12]]);
+            cx = current_trap_cx();
+            cx.x[10] = result as usize;
         }
         Trap::Exception(Exception::StoreFault) |
         Trap::Exception(Exception::StorePageFault) |
         Trap::Exception(Exception::LoadFault) |
-        Trap::Exception(Exception::LoadPageFault) => {
+        Trap::Exception(Exception::LoadPageFault) |
+        Trap::Exception(Exception::InstructionFault) |
+        Trap::Exception(Exception::InstructionPageFault) => {
             println!(
                 "[kernel] PageFault in application, bad addr = {:#x}, bad instruction = {:#x}, kernel killed it.",
                 stval, cx.sepc
             );
-            exit_current_and_run_next();
+            exit_current_and_run_next(-2);
         }
         Trap::Exception(Exception::IllegalInstruction) => {
             println!("[kernel] IllegalInstruction in application, kernel killed it.");
-            exit_current_and_run_next();
+            exit_current_and_run_next(-3);
         }
         Trap::Interrupt(Interrupt::SupervisorTimer) => {
             // println!("[kernel] Timer interrupt!");
