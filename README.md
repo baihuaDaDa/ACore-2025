@@ -29,11 +29,11 @@ ACore-2025
     - [x] Sections loading (ref to page table)
   - Syscall
     - [x] Kick off a new process (Something like fork and exec)
-    - [ ] Wait for child processes (Something like wait)
-    - [ ] Exit from a process (Something like exit)
+    - [x] Wait for child processes (Something like wait)
+    - [x] Exit from a process (Something like exit)
   - Process manager
     - [x] Process creation
-    - [ ] Process termination
+    - [x] Process termination
   - Scheduler
     - [x] Context switch
     - [x] Scheduling mechanism (must be time sharing)
