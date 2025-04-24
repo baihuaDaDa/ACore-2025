@@ -31,11 +31,12 @@ pub fn rust_main() -> ! {
     clear_bss();
     println!("[kernel] Hello, world!");
     mm::init();
-    println!("[kernel] back to world!");
+    task::add_initproc();
+    println!("after initproc!");
     trap::init();
     trap::enable_timer_interrupt();
     timer::set_next_trigger();
-    task::add_initproc();
+    loader::list_apps();
     task::run_tasks();
     panic!("Unreachable in rust_main!");
 }
