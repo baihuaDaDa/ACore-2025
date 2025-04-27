@@ -2,6 +2,9 @@
 #![feature(linkage)]
 #![feature(alloc_error_handler)]
 
+#[macro_use]
+extern crate bitflags;
+
 mod syscall;
 #[macro_use]
 pub mod console;
@@ -23,6 +26,7 @@ fn main() -> i32 {
 
 use core::alloc::Layout;
 use core::ptr::addr_of_mut;
+use bitflags::bitflags;
 use buddy_system_allocator::LockedHeap;
 
 const USER_HEAP_SIZE: usize = 16384;
@@ -46,7 +50,19 @@ fn init_heap() {
 }
 
 
+bitflags! {
+    pub struct Openflags: u32 {
+        const RDONLY = 0;
+        const WRONLY = 1 << 0;
+        const RDWR = 1 << 1;
+        const CREATE = 1 << 9;
+        const TRUNC = 1 << 10;
+    }
+}
+
 use syscall::*;
+pub fn open(path: &str, flags: Openflags) -> isize { sys_open(path, flags.bits) }
+pub fn close(fd: usize) -> isize { sys_close(fd) }
 pub fn read(fd: usize, buf: &mut [u8]) -> isize { sys_read(fd, buf) }
 pub fn write(fd: usize, buf: &[u8]) -> isize { sys_write(fd, buf) }
 pub fn exit(exit_code: i32) -> ! { sys_exit(exit_code); }

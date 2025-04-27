@@ -12,7 +12,6 @@ pub use task::{TaskControlBlock, TaskStatus};
 pub use processor::{run_tasks, schedule, take_current_task, current_task, current_user_token, current_trap_cx};
 pub use manager::add_task;
 use crate::loader::get_app_data_by_name;
-use crate::trap::init;
 
 lazy_static! {
     pub static ref INITPROC: Arc<TaskControlBlock> = Arc::new(
