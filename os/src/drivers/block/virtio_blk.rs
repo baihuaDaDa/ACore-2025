@@ -10,6 +10,7 @@ const VIRTIO0: usize = 0x10001000;
 pub struct VirtIOBlock(UPSafeCell<VirtIOBlk<'static, VirtioHal>>);
 
 impl BlockDevice for VirtIOBlock {
+    // here VirtIOBlk has a default block size of 512 bytes
     fn read_block(&self, block_id: usize, buf: &mut [u8]) {
         self.0
             .exclusive_access()

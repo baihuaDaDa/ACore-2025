@@ -1,0 +1,11 @@
+[package]
+name = "easy-fs-fuse"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+clap = "2.33.3"
+easy-fs = { path = "../easy-fs" }
+
+[profile.release]
+debug = true
