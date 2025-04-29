@@ -1,5 +1,5 @@
 use core::arch::{asm, global_asm};
-use riscv::register::{mtvec::TrapMode, scause::{self, Exception, Interrupt, Trap}, sie, sstatus, stval, stvec};
+use riscv::register::{mtvec::TrapMode, scause::{self, Exception, Interrupt, Trap}, sie, stval, stvec};
 use crate::syscall::syscall;
 use crate::task::{current_trap_cx, current_user_token, exit_current_and_run_next, suspend_current_and_run_next};
 

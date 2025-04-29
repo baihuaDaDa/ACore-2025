@@ -1,5 +1,4 @@
 use riscv::register::sstatus::{self, Sstatus, SPP};
-use crate::mm::KERNEL_SPACE;
 
 #[repr(C)]
 pub struct TrapContext {

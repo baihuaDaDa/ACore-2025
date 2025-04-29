@@ -10,7 +10,7 @@ pub struct Stderr;
 impl File for Stdin {
     fn readable(&self) -> bool { true }
     fn writable(&self) -> bool { false }
-    fn read(&self, buf: UserBuffer) -> usize {
+    fn read(&self, mut buf: UserBuffer) -> usize {
         assert_eq!(buf.len(), 1, "Only support len = 1 in sys_read!");
         let mut c: usize;
         loop {

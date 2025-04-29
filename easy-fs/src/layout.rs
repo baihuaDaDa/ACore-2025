@@ -309,7 +309,7 @@ impl DiskInode {
             // calculate relative start in current block
             let start_relative = start % BLOCK_SIZE;
             // calculate end of current block
-            let mut end_current_block = ((start / BLOCK_SIZE + 1) * BLOCK_SIZE).min(end);
+            let end_current_block = ((start / BLOCK_SIZE + 1) * BLOCK_SIZE).min(end);
             // read and update read size
             let block_read_size = end_current_block - start;
             let dst = &mut buf[read_size..read_size + block_read_size];
@@ -346,7 +346,7 @@ impl DiskInode {
             // calculate relative start in current block
             let start_relative = start % BLOCK_SIZE;
             // calculate end of current block
-            let mut end_current_block = ((start / BLOCK_SIZE + 1) * BLOCK_SIZE).min(end);
+            let end_current_block = ((start / BLOCK_SIZE + 1) * BLOCK_SIZE).min(end);
             // write and update write size
             let block_write_size = end_current_block - start;
             let src = &buf[write_size..write_size + block_write_size];
@@ -388,7 +388,7 @@ impl DirEntry {
 
     pub fn new(name: &str, inode_number: u32) -> Self {
         let mut bytes = [0u8; NAME_LENGTH_LIMIT + 1];
-        &mut bytes[..name.len()].copy_from_slice(name.as_bytes());
+        bytes[..name.len()].copy_from_slice(name.as_bytes());
         Self {
             name: bytes,
             inode_number,

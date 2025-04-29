@@ -43,8 +43,8 @@ pub fn rust_main() -> ! {
 
 fn clear_bss() {
     unsafe extern "C" {
-        safe fn sbss();
-        safe fn ebss();
+        fn sbss();
+        fn ebss();
     }
     (sbss as usize..ebss as usize).for_each(|a| {
         unsafe { (a as *mut u8).write_volatile(0) }

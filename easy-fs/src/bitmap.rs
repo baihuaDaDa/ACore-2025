@@ -67,5 +67,5 @@ impl Bitmap {
 fn decomposition(mut bit: usize) -> (usize, usize, usize) {
     let block_pos = bit / BLOCK_BITS;
     bit = bit % BLOCK_BITS;
-    (block_pos, bit >> 64usize, bit & 0x3fusize)
+    (block_pos, bit >> 6usize, bit & 0x3fusize)
 }

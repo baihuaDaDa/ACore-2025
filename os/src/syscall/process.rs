@@ -1,5 +1,5 @@
 use alloc::sync::Arc;
-use crate::fs::{open_file, File, OpenFlags};
+use crate::fs::{open_file, OpenFlags};
 use crate::mm::{translated_refmut, translated_str};
 use crate::task::{suspend_current_and_run_next, exit_current_and_run_next, current_task, add_task, current_user_token};
 use crate::timer::get_time_ms;

@@ -35,7 +35,7 @@ kernel:
 	@cargo build $(MODE_ARG)
 
 apps:
-	@cd ../user && make build TEST=$(TEST) MODE=$(MODE) TARGET=$(TARGET) OBJCOPY=$(OBJCOPY) OBJDUMP=$(OBJDUMP)
+	@cd ../user && make build TEST=$(TEST) MODE=$(MODE) TARGET=$(TARGET)
 
 fs-img: apps
 	@rm -f $(FS_IMG)

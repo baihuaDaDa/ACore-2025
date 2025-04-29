@@ -1,10 +1,6 @@
 use crate::fs::{open_file, OpenFlags};
 use crate::mm::{translated_byte_buffer, translated_str, UserBuffer};
-use crate::task::{current_task, current_user_token, suspend_current_and_run_next};
-use crate::sbi::console_getchar;
-
-const FD_STDIN: usize = 0;
-const FD_STDOUT: usize = 1;
+use crate::task::{current_task, current_user_token};
 
 pub fn sys_open(path: *const u8, flags: u32) -> isize {
     let task = current_task().unwrap();

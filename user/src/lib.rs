@@ -51,7 +51,7 @@ fn init_heap() {
 
 
 bitflags! {
-    pub struct Openflags: u32 {
+    pub struct OpenFlags: u32 {
         const RDONLY = 0;
         const WRONLY = 1 << 0;
         const RDWR = 1 << 1;
@@ -61,7 +61,7 @@ bitflags! {
 }
 
 use syscall::*;
-pub fn open(path: &str, flags: Openflags) -> isize { sys_open(path, flags.bits) }
+pub fn open(path: &str, flags: OpenFlags) -> isize { sys_open(path, flags.bits) }
 pub fn close(fd: usize) -> isize { sys_close(fd) }
 pub fn read(fd: usize, buf: &mut [u8]) -> isize { sys_read(fd, buf) }
 pub fn write(fd: usize, buf: &[u8]) -> isize { sys_write(fd, buf) }

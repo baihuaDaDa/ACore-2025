@@ -6,7 +6,7 @@ mod heap_allocator;
 
 pub use memory_set::{KERNEL_SPACE, MemorySet, MapPermission, kernel_token};
 pub use address::{StepByOne, PhysAddr, PhysPageNum, VirtAddr, VirtPageNum};
-pub use page_table::{PageTable, translated_byte_buffer, translated_str, translated_refmut, UserBuffer, UserBufferIterator};
+pub use page_table::{PageTable, translated_byte_buffer, translated_str, translated_refmut, UserBuffer};
 pub use frame_allocator::{frame_alloc, frame_dealloc, FrameTracker};
 
 pub fn init() {
