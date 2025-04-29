@@ -48,8 +48,8 @@ ACore-2025
 - File system (Optional)
   - [ ] File/directory creation/deletion
   - [ ] File/directory renaming
-  - [ ] File read
-  - [ ] File write
+  - [x] File read
+  - [x] File write
   - [ ] File/directory moving
   - [ ] (optional) access control, atime/mtime/…
 - [ ] Multicore (Optional)

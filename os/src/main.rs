@@ -15,12 +15,13 @@ mod sbi;
 mod console;
 mod sync;
 mod trap;
-mod loader;
 mod syscall;
 mod config;
 mod task;
 mod timer;
 mod mm;
+mod fs;
+mod drivers;
 
 use core::arch::global_asm;
 global_asm!(include_str!("entry.asm"));
@@ -36,7 +37,7 @@ pub fn rust_main() -> ! {
     trap::init();
     trap::enable_timer_interrupt();
     timer::set_next_trigger();
-    loader::list_apps();
+    fs::list_apps();
     task::run_tasks();
     panic!("Unreachable in rust_main!");
 }

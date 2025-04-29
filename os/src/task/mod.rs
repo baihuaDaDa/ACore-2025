@@ -11,12 +11,14 @@ pub use context::TaskContext;
 pub use task::{TaskControlBlock, TaskStatus};
 pub use processor::{run_tasks, schedule, take_current_task, current_task, current_user_token, current_trap_cx};
 pub use manager::add_task;
-use crate::loader::get_app_data_by_name;
+use crate::fs::{open_file, OpenFlags};
 
 lazy_static! {
-    pub static ref INITPROC: Arc<TaskControlBlock> = Arc::new(
-        TaskControlBlock::new(get_app_data_by_name("initproc").unwrap())
-    );
+    pub static ref INITPROC: Arc<TaskControlBlock> = Arc::new({
+        let inode = open_file("initproc", OpenFlags::RDONLY).unwrap();
+        let v = inode.read_all();
+        TaskControlBlock::new(v.as_slice())
+    });
 }
 
 pub fn add_initproc() {
