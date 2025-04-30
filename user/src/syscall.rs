@@ -1,5 +1,4 @@
 use core::arch::asm;
-use crate::println;
 
 fn syscall(id: usize, args: [usize; 3]) -> isize {
     let mut ret: isize;
