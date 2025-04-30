@@ -7,6 +7,7 @@ extern crate alloc;
 extern crate user_lib;
 
 use alloc::string::String;
+use alloc::vec::Vec;
 use user_lib::console::getchar;
 use user_lib::{exec, fork, waitpid};
 
@@ -26,11 +27,27 @@ pub fn main() -> i32 {
             LF | CR => {
                 println!("");
                 if !line.is_empty() {
-                    line.push('\0');
+                    // split line into args
+                    let args: Vec<_> = line.as_str().split(' ').collect();
+                    let mut args_copy: Vec<String> = args.iter().map(|&arg| {
+                        let mut string = String::new();
+                        string.push_str(arg);
+                        string
+                    }).collect();
+                    args_copy.iter_mut().for_each(|string| {
+                        string.push('\0');
+                    });
+                    // collect start address of args
+                    let mut args_addr: Vec<*const u8> = args_copy
+                        .iter()
+                        .map(|arg| arg.as_ptr())
+                        .collect();
+                    args_addr.push(0 as *const u8);
+                    // execute
                     let pid = fork();
                     if pid == 0 {
                         // child process
-                        if exec(line.as_str()) == -1 {
+                        if exec(args_copy[0].as_str(), args_addr.as_slice()) == -1 {
                             println!("Error when executing!");
                             return -4;
                         }
