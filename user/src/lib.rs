@@ -63,6 +63,7 @@ bitflags! {
 use syscall::*;
 pub fn open(path: &str, flags: OpenFlags) -> isize { sys_open(path, flags.bits) }
 pub fn close(fd: usize) -> isize { sys_close(fd) }
+pub fn pipe(pipe_fd: &mut [usize]) -> isize { sys_pipe(pipe_fd) }
 pub fn read(fd: usize, buf: &mut [u8]) -> isize { sys_read(fd, buf) }
 pub fn write(fd: usize, buf: &[u8]) -> isize { sys_write(fd, buf) }
 pub fn exit(exit_code: i32) -> ! { sys_exit(exit_code); }
@@ -70,7 +71,7 @@ pub fn yield_() -> isize { sys_yield() }
 pub fn get_time() -> isize { sys_get_time() }
 pub fn getpid() -> isize { sys_getpid() }
 pub fn fork() -> isize { sys_fork() }
-pub fn exec(path: &str) -> isize { sys_exec(path) }
+pub fn exec(path: &str, args: &[*const u8]) -> isize { sys_exec(path, args) }
 pub fn wait(exit_code: &mut i32) -> isize {
     loop {
         match sys_waitpid(-1, exit_code as *mut _) {

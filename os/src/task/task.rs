@@ -115,7 +115,7 @@ impl TaskControlBlock {
         let mut new_fd_table: Vec<Option<Arc<dyn File + Send + Sync>>> = Vec::new();
         for fd in parent_inner.fd_table.iter() {
             if let Some(file) = fd {
-                new_fd_table.push(Some(file.clone())); // TODO 难道不应该深拷贝吗
+                new_fd_table.push(Some(file.clone()));
             } else {
                 new_fd_table.push(None);
             }
