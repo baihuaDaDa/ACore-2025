@@ -14,6 +14,7 @@ fn syscall(id: usize, args: [usize; 3]) -> isize {
     ret
 }
 
+const SYSCALL_DUP: usize = 24;
 const SYSCALL_OPEN: usize = 56;
 const SYSCALL_CLOSE: usize = 57;
 const SYSCALL_PIPE: usize = 59;
@@ -26,6 +27,10 @@ const SYSCALL_GETPID: usize = 172;
 const SYSCALL_FORK: usize = 220;
 const SYSCALL_EXEC: usize = 221;
 const SYSCALL_WAITPID: usize = 260;
+
+pub fn sys_dup(fd: usize) -> isize {
+    syscall(SYSCALL_DUP, [fd, 0, 0])
+}
 
 pub fn sys_open(path: &str, flags: u32) -> isize {
     syscall(SYSCALL_OPEN, [path.as_ptr() as usize, flags as usize, 0])

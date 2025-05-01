@@ -25,7 +25,7 @@ pub extern "C" fn _start(argc: usize, argv: usize) -> ! {
         }).unwrap();
         v.push(
             core::str::from_utf8(unsafe {
-                core::slice::from_raw_parts(str_start as *const u8, len)
+                core::slice::from_raw_parts(str_start as *const u8, len + 1)
             }).unwrap()
         );
     }
@@ -77,6 +77,7 @@ bitflags! {
 }
 
 use syscall::*;
+pub fn dup(fd: usize) -> isize { sys_dup(fd) }
 pub fn open(path: &str, flags: OpenFlags) -> isize { sys_open(path, flags.bits) }
 pub fn close(fd: usize) -> isize { sys_close(fd) }
 pub fn pipe(pipe_fd: &mut [usize]) -> isize { sys_pipe(pipe_fd) }

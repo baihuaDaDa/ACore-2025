@@ -2,6 +2,20 @@ use crate::fs::{make_pipe, open_file, OpenFlags};
 use crate::mm::{translated_byte_buffer, translated_refmut, translated_str, UserBuffer};
 use crate::task::{current_task, current_user_token};
 
+pub fn sys_dup(fd: usize) -> isize {
+    let task = current_task().unwrap();
+    let mut inner = task.inner_exclusive_access();
+    if fd >= inner.fd_table.len() {
+        return -1;
+    }
+    if inner.fd_table[fd].is_none() {
+        return -1;
+    }
+    let new_fd = inner.alloc_fd();
+    inner.fd_table[new_fd] = inner.fd_table[fd].clone();
+    new_fd as isize
+}
+
 pub fn sys_open(path: *const u8, flags: u32) -> isize {
     let task = current_task().unwrap();
     let token = current_user_token();
