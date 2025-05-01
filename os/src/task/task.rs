@@ -196,7 +196,7 @@ impl TaskControlBlock {
             self.kernel_stack.get_top(),
             trap_handler as usize,
         );
-        trap_cx.x[10] = args.len();
+        trap_cx.x[10] = args.len(); // actually no need to push argc, since later the return value will overwrite a0
         trap_cx.x[11] = argv_base;
         // stop exclusively accessing inner automatically
     }
