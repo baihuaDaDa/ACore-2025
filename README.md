@@ -19,10 +19,10 @@ ACore-2025
   - [x] Read
   - [x] Write
 - Message & data transfer
-  - [ ] User -> Kernel
-  - [ ] Kernel -> User
-  - [ ] Kernel -> Kernel
-  - [ ] User -> User
+  - [x] User -> Kernel
+  - [x] Kernel -> User
+  - [x] Kernel -> Kernel
+  - [x] User -> User
 - Process
   - Process loading
     - [x] ELF parsing
@@ -41,7 +41,7 @@ ACore-2025
     - [x] Timer interrupt
     - [ ] IPI (Optional)
   - IPC
-    - [ ] Pipe
+    - [x] Pipe
 - Synchronization primitives
   - [ ] Mutex
   - [ ] Conditional variables (Optional)
