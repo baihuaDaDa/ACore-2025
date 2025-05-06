@@ -89,7 +89,14 @@ impl TaskControlBlock {
                         Some(Arc::new(Stdout)),
                         // 2 -> stderr
                         Some(Arc::new(Stderr)),
-                    ]
+                    ],
+                    signals: SignalFlags::empty(),
+                    signal_mask: SignalFlags::empty(),
+                    handling_sig: -1,
+                    signal_actions: SignalActions::default(),
+                    killed: false,
+                    frozen: false,
+                    trap_cx_backup: None,
                 })
             },
     };
@@ -143,6 +150,14 @@ impl TaskControlBlock {
                     children: Vec::new(),
                     exit_code: 0,
                     fd_table: new_fd_table,
+                    signals: SignalFlags::empty(),
+                    // inherit the signal_mask and signal_actions
+                    signal_mask: parent_inner.signal_mask,
+                    handling_sig: -1,
+                    signal_actions: parent_inner.signal_actions.clone(),
+                    killed: false,
+                    frozen: false,
+                    trap_cx_backup: None,
                 })
             },
         });

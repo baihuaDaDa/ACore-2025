@@ -1,7 +1,7 @@
 use core::arch::{asm, global_asm};
 use riscv::register::{mtvec::TrapMode, scause::{self, Exception, Interrupt, Trap}, sie, stval, stvec};
 use crate::syscall::syscall;
-use crate::task::{check_signals_error_of_current, current_add_signal, current_trap_cx, current_user_token, exit_current_and_run_next, suspend_current_and_run_next, SignalFlags};
+use crate::task::{check_signals_error_of_current, current_add_signal, current_trap_cx, current_user_token, exit_current_and_run_next, handle_signals, suspend_current_and_run_next, SignalFlags};
 
 mod context;
 
@@ -103,6 +103,7 @@ pub fn trap_handler() -> ! {
             panic!("Unsupported trap {:?}, stval = {:#x}", scause.cause(), stval);
         }
     }
+    handle_signals();
     // check error signals (if error then exit)
     if let Some((errno, msg)) = check_signals_error_of_current() {
         println!("[kernel] {}", msg);
