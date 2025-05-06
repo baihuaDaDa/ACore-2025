@@ -12,7 +12,7 @@ use lazy_static::*;
 pub use context::TaskContext;
 pub use task::{TaskControlBlock, TaskStatus};
 pub use processor::{run_tasks, schedule, take_current_task, current_task, current_user_token, current_trap_cx};
-pub use manager::{add_task, pid2task};
+pub use manager::{add_task, pid2task, remove_from_pid2task};
 pub use signal::{MAX_SIG, SignalFlags};
 pub use action::{SignalAction, SignalActions};
 use crate::fs::{open_file, OpenFlags};
@@ -48,6 +48,8 @@ pub fn suspend_current_and_run_next() {
 pub fn exit_current_and_run_next(exit_code: i32) {
     // take from Processor
     let task = take_current_task().unwrap();
+    // remove PCB from PID2TCB
+    remove_from_pid2task(task.getpid());
     // access current TCB exclusively
     let mut inner = task.inner_exclusive_access();
     // change status to Zombie
@@ -63,7 +65,7 @@ pub fn exit_current_and_run_next(exit_code: i32) {
             initproc_inner.children.push(child.clone());
         }
     }
-    // stop exclusively accessing parent PCB
+    // stop exclusively accessing child PCB
     inner.children.clear();
     // deallocate user space
     inner.memory_set.recycle_data_pages();
