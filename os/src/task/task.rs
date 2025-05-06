@@ -5,9 +5,10 @@ use alloc::vec::Vec;
 use core::cell::RefMut;
 use crate::config::TRAP_CONTEXT;
 use crate::fs::{File, Stderr, Stdin, Stdout};
-use super::TaskContext;
+use super::{SignalFlags, TaskContext};
 use crate::mm::{translated_refmut, MemorySet, PhysPageNum, VirtAddr, KERNEL_SPACE};
 use crate::sync::UPSafeCell;
+use crate::task::action::SignalActions;
 use crate::task::pid::{pid_alloc, KernelStack, PidHandle};
 use crate::trap::{trap_handler, TrapContext};
 
@@ -38,6 +39,13 @@ pub struct TaskControlBlockInner {
     pub children: Vec<Arc<TaskControlBlock>>,
     pub exit_code: i32,
     pub fd_table: Vec<Option<Arc<dyn File + Send + Sync>>>,
+    pub signal_mask: SignalFlags,
+    pub signal_actions: SignalActions,
+    pub signals: SignalFlags,
+    pub killed: bool,
+    pub frozen: bool,
+    pub handling_sig: isize,
+    pub trap_cx_backup: Option<TrapContext>,
 }
 
 impl TaskControlBlock {

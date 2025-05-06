@@ -1,7 +1,7 @@
 use core::arch::{asm, global_asm};
 use riscv::register::{mtvec::TrapMode, scause::{self, Exception, Interrupt, Trap}, sie, stval, stvec};
 use crate::syscall::syscall;
-use crate::task::{current_trap_cx, current_user_token, exit_current_and_run_next, suspend_current_and_run_next};
+use crate::task::{check_signals_error_of_current, current_add_signal, current_trap_cx, current_user_token, exit_current_and_run_next, suspend_current_and_run_next, SignalFlags};
 
 mod context;
 
@@ -82,15 +82,17 @@ pub fn trap_handler() -> ! {
         Trap::Exception(Exception::LoadPageFault) |
         Trap::Exception(Exception::InstructionFault) |
         Trap::Exception(Exception::InstructionPageFault) => {
-            println!(
-                "[kernel] PageFault in application, bad addr = {:#x}, bad instruction = {:#x}, kernel killed it.",
-                stval, cx.sepc
-            );
-            exit_current_and_run_next(-2);
+            // println!(
+            //     "[kernel] PageFault in application, bad addr = {:#x}, bad instruction = {:#x}, kernel killed it.",
+            //     stval, cx.sepc
+            // );
+            // exit_current_and_run_next(-2);
+            current_add_signal(SignalFlags::SIGSEGV);
         }
         Trap::Exception(Exception::IllegalInstruction) => {
-            println!("[kernel] IllegalInstruction in application, kernel killed it.");
-            exit_current_and_run_next(-3);
+            // println!("[kernel] IllegalInstruction in application, kernel killed it.");
+            // exit_current_and_run_next(-3);
+            current_add_signal(SignalFlags::SIGILL);
         }
         Trap::Interrupt(Interrupt::SupervisorTimer) => {
             // println!("[kernel] Timer interrupt!");
@@ -100,6 +102,11 @@ pub fn trap_handler() -> ! {
         _ => {
             panic!("Unsupported trap {:?}, stval = {:#x}", scause.cause(), stval);
         }
+    }
+    // check error signals (if error then exit)
+    if let Some((errno, msg)) = check_signals_error_of_current() {
+        println!("[kernel] {}", msg);
+        exit_current_and_run_next(errno);
     }
     trap_return();
 }

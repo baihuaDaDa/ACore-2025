@@ -3,7 +3,7 @@ use alloc::sync::Arc;
 use alloc::vec::Vec;
 use crate::fs::{open_file, OpenFlags};
 use crate::mm::{translated_ref, translated_refmut, translated_str};
-use crate::task::{suspend_current_and_run_next, exit_current_and_run_next, current_task, add_task, current_user_token};
+use crate::task::{suspend_current_and_run_next, exit_current_and_run_next, current_task, add_task, current_user_token, SignalFlags, SignalAction, MAX_SIG, pid2task};
 use crate::timer::get_time_ms;
 
 pub fn sys_exit(exit_code: i32) -> ! {
@@ -15,6 +15,87 @@ pub fn sys_exit(exit_code: i32) -> ! {
 pub fn sys_yield() -> isize {
     suspend_current_and_run_next();
     0
+}
+
+pub fn sys_kill(pid: usize, signum: i32) -> isize {
+    if let Some(task) = pid2task(pid) {
+        if let Some(flag) = SignalFlags::from_bits(1 << signum) {
+            // insert the signal if legal
+            let mut task_ref = task.inner_exclusive_access();
+            if task_ref.signals.contains(flag) {
+                return -1;
+            }
+            task_ref.signals.insert(flag);
+            0
+        } else {
+            -1
+        }
+    } else {
+        -1
+    }
+}
+
+fn check_sigaction_error(signal: SignalFlags, action: usize, old_action: usize) -> bool {
+    if action == 0
+        || old_action == 0
+        || signal == SignalFlags::SIGKILL
+        || signal == SignalFlags::SIGSTOP {
+        true
+    } else {
+        false
+    }
+}
+
+pub fn sys_sigaction(
+    signum: i32,
+    action: *const SignalAction,
+    old_action: *mut SignalAction,
+) -> isize {
+    let token = current_user_token();
+    let task = current_task().unwrap();
+    let mut inner = task.inner_exclusive_access();
+    if signum as usize > MAX_SIG {
+        return -1;
+    }
+    if let Some(flag) = SignalFlags::from_bits(1 << signum) {
+        if check_sigaction_error(flag, action as usize, old_action as usize) {
+            return -1;
+        }
+        let prev_action = inner.signal_actions.table[signum as usize];
+        *translated_refmut(token, old_action) = prev_action;
+        inner.signal_actions.table[signum as usize] = *translated_ref(token, action);
+        0
+    } else {
+        -1
+    }
+}
+
+pub fn sys_sigprocmask(mask: u32) -> isize {
+    if let Some(task) = current_task() {
+        let mut inner = task.inner_exclusive_access();
+        let old_mask = inner.signal_mask;
+        if let Some(flag) = SignalFlags::from_bits(mask) {
+            inner.signal_mask = flag;
+            old_mask.bits() as isize
+        } else {
+            -1
+        }
+    } else {
+        -1
+    }
+}
+
+pub fn sys_sigreturn() -> isize {
+    if let Some(task) = current_task() {
+        let mut inner = task.inner_exclusive_access();
+        inner.handling_sig = -1;
+        // restore the trap context
+        let trap_cx = inner.get_trap_cx();
+        *trap_cx = inner.trap_cx_backup.unwrap();
+        trap_cx.x[10] as isize
+    } else {
+        -1
+    }
 }
 
 pub fn sys_get_time() -> isize {
