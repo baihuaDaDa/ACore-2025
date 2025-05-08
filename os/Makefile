@@ -7,6 +7,7 @@ FS_IMG := ../user/target/$(TARGET)/$(MODE)/fs.img
 APPS := ../user/src/bin
 
 TEST ?=
+SBI ?=
 
 # Building mode argument
 ifeq ($(MODE), release)
@@ -15,11 +16,18 @@ endif
 
 # BOARD
 BOARD := qemu
-SBI ?= rustsbi
 BOOTLOADER := ../bootloader/$(SBI)-$(BOARD).bin
 
-# KERNEL ENTRY
-KERNEL_ENTRY_PA := 0x80200000
+# KERNEL ENTRY & BIOS & LINKER
+ifeq ($(SBI), rustsbi)
+	KERNEL_ENTRY_PA := 0x80200000
+	BIOS := $(BOOTLOADER)
+	LINKER := src/linker-$(BOARD)-$(SBI).ld
+else
+	KERNEL_ENTRY_PA := 0x80000000
+	BIOS := none
+	LINKER := src/linker-$(BOARD)-mysbi.ld
+endif
 
 # Binutils
 OBJDUMP := rust-objdump --arch-name=riscv64
@@ -32,7 +40,9 @@ $(KERNEL_BIN): kernel
 
 kernel:
 	@echo Paltform: $(BOARD)
+	@cp $(LINKER) src/linker.ld
 	@cargo build $(MODE_ARG)
+	@rm src/linker.ld
 
 apps:
 	@cd ../user && make build TEST=$(TEST) MODE=$(MODE) TARGET=$(TARGET)
@@ -51,7 +61,7 @@ clean-all: clean clean-user
 
 QEMU_ARGS := -machine virt \
              			 -nographic \
-             			 -bios $(BOOTLOADER) \
+             			 -bios $(BIOS) \
              			 -device loader,file=$(KERNEL_BIN),addr=$(KERNEL_ENTRY_PA) \
              			 -drive file=$(FS_IMG),if=none,format=raw,id=x0 \
              			 -device virtio-blk-device,drive=x0,bus=virtio-mmio-bus.0
