@@ -1,4 +1,5 @@
 use core::panic::PanicInfo;
+use crate::{getpid, kill, SIGABRT};
 
 #[panic_handler]
 fn panic_handler(info: &PanicInfo) -> ! {
@@ -12,5 +13,6 @@ fn panic_handler(info: &PanicInfo) -> ! {
     } else {
         crate::println!("Panicked: {}", info.message());
     }
-    loop{}
+    kill(getpid() as usize, SIGABRT);
+    unreachable!()
 }
