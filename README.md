@@ -9,7 +9,7 @@ ACore-2025
   - [ ] Initialization
   - [ ] Entering S mode for the kernel
 - Allocator
-  - [ ] Buddy allocator
+  - [x] Buddy allocator
   - [x] Frame allocator (or any fine-grained allocator for any size of memory)
   - [ ] SLAB (Optional)
 - Page table
