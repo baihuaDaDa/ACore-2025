@@ -43,14 +43,14 @@ use alloc::vec::Vec;
 use core::alloc::Layout;
 use core::ptr::addr_of_mut;
 use bitflags::bitflags;
-use buddy_system_allocator::LockedHeap;
+use buddy_allocator::LockedBuddyAllocator;
 
 const USER_HEAP_SIZE: usize = 16384;
 
-static mut HEAP_SPACE: [u8; USER_HEAP_SIZE] = [0; USER_HEAP_SIZE];
+static mut USER_HEAP_SPACE: [u8; USER_HEAP_SIZE] = [0; USER_HEAP_SIZE];
 
 #[global_allocator]
-static HEAP_ALLOCATOR: LockedHeap = LockedHeap::empty();
+static HEAP_ALLOCATOR: LockedBuddyAllocator = LockedBuddyAllocator::empty();
 
 #[alloc_error_handler]
 pub fn handle_alloc_error(layout: Layout) -> ! {
@@ -61,7 +61,7 @@ fn init_heap() {
     unsafe {
         HEAP_ALLOCATOR
             .lock()
-            .init(addr_of_mut!(HEAP_SPACE) as usize, USER_HEAP_SIZE);
+            .init(addr_of_mut!(USER_HEAP_SPACE) as usize, USER_HEAP_SIZE);
     }
 }
 

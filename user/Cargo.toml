@@ -5,7 +5,7 @@ edition = "2024"
 
 [dependencies]
 riscv = { git = "https://github.com/rcore-os/riscv", features = ["inline-asm"] }
-buddy_system_allocator = "0.6"
+buddy-allocator = { path = "../buddy-allocator" }
 bitflags = "1.2.1"
 
 [profile.release]
