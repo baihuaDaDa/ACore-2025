@@ -3,8 +3,10 @@ pub struct LinkedList {
     head: *mut usize,
 }
 
+unsafe impl Send for LinkedList {}
+
 impl LinkedList {
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         Self { head: core::ptr::null_mut() }
     }
     

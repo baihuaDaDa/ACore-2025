@@ -3,11 +3,11 @@
 mod linked_list;
 mod math;
 
-use spin::Mutex;
+use spin::{Mutex, MutexGuard};
 use core::alloc::{GlobalAlloc, Layout};
 use core::cmp::{max, min};
 use linked_list::LinkedList;
-use crate::math::prev_power_of_two;
+use math::prev_power_of_two;
 
 const BLOCK_LEVEL: usize = 32;
 const UNIT_SIZE: usize = size_of::<usize>();
@@ -20,7 +20,7 @@ pub struct BuddyAllocator {
 }
 
 impl BuddyAllocator {
-    pub fn empty() -> Self {
+    pub const fn empty() -> Self {
         Self {
             free_list: [LinkedList::new(); BLOCK_LEVEL],
             total: 0,
@@ -49,8 +49,8 @@ impl BuddyAllocator {
         self.total += total;
     }
     
-    pub unsafe fn init(&mut self, start: usize, end: usize) {
-        unsafe { self.add_to_heap(start, end); }
+    pub unsafe fn init(&mut self, start: usize, heap_size: usize) {
+        unsafe { self.add_to_heap(start, start + heap_size); }
     }
     
     fn split(&mut self, from: usize, to: usize) {
@@ -124,8 +124,12 @@ impl BuddyAllocator {
 pub struct LockedBuddyAllocator(Mutex<BuddyAllocator>);
 
 impl LockedBuddyAllocator {
-    pub fn empty() -> Self {
+    pub const fn empty() -> Self {
         Self(Mutex::new(BuddyAllocator::empty()))
+    }
+
+    pub fn lock(&self) -> MutexGuard<BuddyAllocator> {
+        self.0.lock()
     }
 }
 
