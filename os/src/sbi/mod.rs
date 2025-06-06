@@ -1,5 +1,10 @@
 #![allow(unused)]
 
+use crate::sbi::power_off::power_off;
+
+mod uart;
+mod power_off;
+
 pub fn console_putchar(c: usize) {
     #[allow(deprecated)]
     sbi_rt::legacy::console_putchar(c);
@@ -11,13 +16,7 @@ pub fn console_getchar() -> usize {
 }
 
 pub fn shutdown(failure: bool) -> ! {
-    use sbi_rt::{system_reset, NoReason, Shutdown, SystemFailure};
-    if !failure {
-        system_reset(Shutdown, NoReason);
-    } else {
-        system_reset(Shutdown, SystemFailure);
-    }
-    unreachable!()
+    power_off(failure)
 }
 
 pub fn set_timer(timer: usize) {

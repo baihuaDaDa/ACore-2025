@@ -231,7 +231,7 @@ impl MemorySet {
             MapPermission::R | MapPermission::W,
         ), None);
         println!("mapping memory-mapped registers");
-        for pair in MMIO {
+        for pair in MMIO_VIRT_IO {
             memory_set.push(MapArea::new(
                 (*pair).0.into(),
                 ((*pair).0 + (*pair).1).into(),
