@@ -1,6 +1,16 @@
 use crate::config::{MMIO_VIRT_UART, UART_DIVISOR};
 use bitflags::*;
 use core::sync::atomic::{AtomicU8, Ordering};
+use lazy_static::lazy_static;
+use crate::sync::UPSafeCell;
+
+macro_rules! wait_for {
+    ($condition:expr) => {
+        while !($condition) {
+            core::hint::spin_loop();
+        }
+    };
+}
 
 bitflags! {
     struct InterruptEnable: u8 {
@@ -97,14 +107,17 @@ impl UartRaw {
         ); // Enable RX and TX interrupts
     }
 
-    pub fn send(&mut self, byte: u8) {
+    pub fn send(&self, byte: u8) {
+        wait_for!((self.read_port.lsr.load(Ordering::Acquire) & LineStatus::OUTPUT_EMPTY.bits) != 0);
+        self.write_port.thr.store(byte, Ordering::Release);
     }
 
-    pub fn recv(&mut self) -> Option<u8> {
-        if self.read_port.lsr.load(Ordering::Relaxed) & 0x01 != 0 {
-            Some(self.read_port.rbr.load(Ordering::Relaxed))
-        } else {
-            None
-        }
+    pub fn recv(&self) -> u8 {
+        wait_for!((self.read_port.lsr.load(Ordering::Acquire) & LineStatus::INPUT_AVAILABLE.bits) != 0);
+        self.read_port.rbr.load(Ordering::Acquire)
     }
+}
+
+lazy_static! {
+    pub static ref UART: UPSafeCell<UartRaw> = unsafe { UPSafeCell::new(UartRaw::new(MMIO_VIRT_UART.0)) };
 }

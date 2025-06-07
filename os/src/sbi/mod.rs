@@ -1,18 +1,19 @@
 #![allow(unused)]
 
-use crate::sbi::power_off::power_off;
-
 mod uart;
 mod power_off;
 
-pub fn console_putchar(c: usize) {
-    #[allow(deprecated)]
-    sbi_rt::legacy::console_putchar(c);
+use core::fmt;
+use core::fmt::Write;
+use power_off::power_off;
+use uart::UART;
+
+pub fn console_putchar(c: u8) {
+    UART.exclusive_access().send(c);
 }
 
-pub fn console_getchar() -> usize {
-    #[allow(deprecated)]
-    sbi_rt::legacy::console_getchar()
+pub fn console_getchar() -> u8 {
+    UART.exclusive_access().recv()
 }
 
 pub fn shutdown(failure: bool) -> ! {
