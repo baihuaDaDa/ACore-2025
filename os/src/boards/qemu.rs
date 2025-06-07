@@ -10,6 +10,10 @@ pub const MMIO_VIRT_IO: &[(usize, usize)] = &[
 pub const MMIO_VIRT_UART: (usize, usize) = (0x1000_0000, 0x100);
 // for shutdown
 pub const MMIO_VIRT_TEST: (usize, usize) = (0x10_0000, 0x1000);
+// for timer
+pub const MMIO_CLINT_BASE: usize = 0x2000000;
+pub const MTIME_OFFSET: usize = 0xBFF8;
+pub const MTIMECMP_OFFSET: usize = 0x4000;
 
 // for shutdown
 pub const FINISHER_FAIL: u32 = 0x3333;

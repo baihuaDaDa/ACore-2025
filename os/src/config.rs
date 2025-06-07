@@ -10,10 +10,7 @@ pub const CLOCK_FREQ: usize = 403000000 / 62;
 #[cfg(feature = "board_qemu")]
 pub const CLOCK_FREQ: usize = 12500000;
 */
-pub use crate::board::{CLOCK_FREQ, MEMORY_END, MMIO_VIRT_IO, 
-                       MMIO_VIRT_UART, MMIO_VIRT_TEST, FINISHER_FAIL, 
-                       FINISHER_PASS};
-
+pub use crate::board::*;
 pub const UART_DIVISOR: u16 = 3;
 
 pub const PAGE_SIZE: usize = 4096;

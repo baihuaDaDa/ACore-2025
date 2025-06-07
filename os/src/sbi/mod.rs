@@ -2,11 +2,15 @@
 
 mod uart;
 mod power_off;
+mod mtime;
 
-use core::fmt;
-use core::fmt::Write;
 use power_off::power_off;
 use uart::UART;
+use mtime::sbi_set_timer;
+
+pub fn init() {
+    UART.exclusive_access().init();
+}
 
 pub fn console_putchar(c: u8) {
     UART.exclusive_access().send(c);
@@ -21,5 +25,5 @@ pub fn shutdown(failure: bool) -> ! {
 }
 
 pub fn set_timer(timer: usize) {
-    sbi_rt::set_timer(timer as _);
+    sbi_set_timer(timer as _);
 }

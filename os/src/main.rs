@@ -28,6 +28,7 @@ global_asm!(include_str!("entry.asm"));
 
 #[unsafe(no_mangle)]
 pub fn rust_main() -> ! {
+    sbi::init();
     clear_bss();
     println!("[kernel] Hello, world!");
     mm::init();
