@@ -212,3 +212,20 @@ pub fn sleep(period_ms: usize) {
         sys_yield();
     }
 }
+
+pub fn thread_create(entry: usize, arg: usize) -> isize {
+    sys_thread_create(entry, arg)
+}
+
+pub fn gettid() -> isize {
+    sys_gettid()
+}
+
+pub fn waittid(tid: usize) -> isize { // 与 waitpid 不同，返回 exit_code 而不是 exit_tid
+    loop {
+        match sys_waittid(tid) {
+            -2 => { sys_yield(); }
+            exit_code => return exit_code,
+        }
+    }
+}
