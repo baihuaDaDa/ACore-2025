@@ -154,7 +154,7 @@ impl TaskUserRes {
         process_inner.memory_set.insert_framed_area(
             ustack_bottom.into(),
             ustack_top.into(),
-            MapPermission::R | MapPermission::W,
+            MapPermission::R | MapPermission::W | MapPermission::U,
         );
         // alloc trap_cx
         let trap_cx_bottom = trap_cx_bottom_from_tid(self.tid);

@@ -13,7 +13,7 @@ use alloc::vec::Vec;
 use lazy_static::*;
 pub use context::TaskContext;
 pub use task::{TaskControlBlock, TaskStatus};
-pub use processor::{run_tasks, schedule, take_current_task, current_task, current_user_token, current_trap_cx};
+pub use processor::{run_tasks, schedule, take_current_task, current_task, current_user_token, current_trap_cx, current_process, current_trap_cx_user_va, current_kstack_top};
 pub use manager::{add_task, pid2process, remove_from_pid2process};
 pub use signal::{MAX_SIG, SignalFlags};
 pub use action::{SignalAction, SignalActions};
@@ -78,7 +78,7 @@ pub fn exit_current_and_run_next(exit_code: i32) {
             }
         }
         // remove PCB from PID2TCB
-        remove_from_pid2process(pid); 
+        remove_from_pid2process(pid);
         let mut process_inner = process.inner_exclusive_access();
         // change status to Zombie
         process_inner.is_zombie = true;
@@ -107,7 +107,7 @@ pub fn exit_current_and_run_next(exit_code: i32) {
         }
         // release process_inner first to let drop(res) access PCB inner
         drop(process_inner);
-        recycle_res.clear(); 
+        recycle_res.clear();
         let mut process_inner = process.inner_exclusive_access();
         // deallocate other data in user space
         process_inner.memory_set.recycle_data_pages();

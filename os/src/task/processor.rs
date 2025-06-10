@@ -48,7 +48,7 @@ pub fn current_task() -> Option<Arc<TaskControlBlock>> {
 }
 
 pub fn current_process() -> Arc<ProcessControlBlock> {
-    current_task().unwrap().process.upgrade().unwrap()
+    current_task().unwrap().get_process()
 }
 
 pub fn current_user_token() -> usize {

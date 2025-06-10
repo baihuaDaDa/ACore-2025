@@ -36,6 +36,11 @@ pub fn sys_thread_create(entry: usize, arg: usize) -> isize {
     new_task_tid as isize
 }
 
+pub fn sys_gettid() -> isize {
+    let task = current_task().unwrap();
+    task.tid as isize
+}
+
 pub fn sys_waittid(tid: usize) -> isize {
     let task = current_task().unwrap();
     let process = task.get_process();
@@ -47,18 +52,19 @@ pub fn sys_waittid(tid: usize) -> isize {
     }
     let mut exit_code: Option<i32> = None;
     let waited_task = process_inner.tasks[tid].as_ref();
-    if waited_task.is_some() {
-        if let Some(waited_exit_code) = waited_task.unwrap().inner_exclusive_access().exit_code {
+    if let Some(waited_task) = waited_task {
+        if let Some(waited_exit_code) = waited_task.inner_exclusive_access().exit_code {
             exit_code = Some(waited_exit_code);
         }
     } else {
         // waited thread does not exist
         return -1;
     }
-    if exit_code.is_some() {
+    if let Some(exit_code) = exit_code {
         // dealloc the exited thread
+        process_inner.dealloc_tid(tid);
         process_inner.tasks[tid] = None;
-        exit_code.unwrap() as isize
+        exit_code as isize
     } else {
         // waited thread has not exited
         -2

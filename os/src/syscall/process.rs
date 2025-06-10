@@ -113,7 +113,7 @@ pub fn sys_fork() -> isize {
     let current_task = current_task().unwrap();
     let new_process = current_task.get_process().fork();
     let new_process_inner = new_process.inner_exclusive_access();
-    let new_pid = new_process.pid.0;
+    let new_pid = new_process.getpid();
     let new_main_thread = new_process_inner
         .tasks[0]
         .as_ref()
@@ -124,7 +124,6 @@ pub fn sys_fork() -> isize {
     // for child process, fork returns 0
     trap_cx.x[10] = 0; // x[10] is a0 reg
     // add new task to scheduler
-    add_task(new_main_thread.clone());
     new_pid as isize
 }
 

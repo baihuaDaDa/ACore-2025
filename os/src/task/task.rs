@@ -1,17 +1,11 @@
-use alloc::string::String;
 use alloc::sync::{Arc, Weak};
-use alloc::vec;
-use alloc::vec::Vec;
 use core::cell::RefMut;
-use crate::config::TRAP_CONTEXT_BASE;
-use crate::fs::{File, Stderr, Stdin, Stdout};
-use super::{SignalFlags, TaskContext};
-use crate::mm::{translated_refmut, MemorySet, PhysPageNum, VirtAddr, KERNEL_SPACE};
+use super::TaskContext;
+use crate::mm::PhysPageNum;
 use crate::sync::UPSafeCell;
-use crate::task::action::SignalActions;
-use crate::task::id::{pid_alloc, KernelStack, PidHandle, TaskUserRes};
+use crate::task::id::{KernelStack, TaskUserRes};
 use crate::task::process::ProcessControlBlock;
-use crate::trap::{trap_handler, TrapContext};
+use crate::trap::TrapContext;
 
 #[derive(Copy, Clone, PartialEq)]
 pub enum TaskStatus {
@@ -75,18 +69,6 @@ impl TaskControlBlock {
     
     pub fn get_user_token(&self) -> usize {
         self.get_process().inner_exclusive_access().get_user_token()
-    }
-    
-    pub fn dealloc_tid(&self) {
-        let process = self.get_process();
-        let mut process_inner = process.inner_exclusive_access();
-        process_inner.dealloc_tid(self.tid);
-    }
-}
-
-impl Drop for TaskControlBlock {
-    fn drop(&mut self) {
-        self.dealloc_tid();
     }
 }
 
