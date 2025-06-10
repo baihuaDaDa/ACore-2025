@@ -23,6 +23,7 @@ pub enum TaskStatus {
 pub struct TaskControlBlock {
     // immutable
     pub process: Weak<ProcessControlBlock>,
+    pub tid: usize,
     pub kstack: KernelStack,
     // mutable
     inner: UPSafeCell<TaskControlBlockInner>,
@@ -56,6 +57,7 @@ impl TaskControlBlock {
         let kstack_top = kstack.get_top();
         Self {
             process: Arc::downgrade(&process),
+            tid: res.tid,
             kstack,
             inner: unsafe { UPSafeCell::new(TaskControlBlockInner {
                 res: Some(res),
@@ -73,6 +75,18 @@ impl TaskControlBlock {
     
     pub fn get_user_token(&self) -> usize {
         self.get_process().inner_exclusive_access().get_user_token()
+    }
+    
+    pub fn dealloc_tid(&self) {
+        let process = self.get_process();
+        let mut process_inner = process.inner_exclusive_access();
+        process_inner.dealloc_tid(self.tid);
+    }
+}
+
+impl Drop for TaskControlBlock {
+    fn drop(&mut self) {
+        self.dealloc_tid();
     }
 }
 

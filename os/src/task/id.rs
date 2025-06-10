@@ -181,12 +181,6 @@ impl TaskUserRes {
             .remove_area_with_start_vpn(trap_cx_bottom_va.into())
     }
     
-    pub fn dealloc_tid(&self) {
-        let process = self.process.upgrade().unwrap();
-        let mut process_inner = process.inner_exclusive_access();
-        process_inner.dealloc_tid(self.tid);
-    }
-    
     pub fn trap_cx_user_va(&self) -> usize {
         trap_cx_bottom_from_tid(self.tid)
     }
@@ -213,7 +207,6 @@ impl TaskUserRes {
 
 impl Drop for TaskUserRes {
     fn drop(&mut self) {
-        self.dealloc_tid();
         self.dealloc_user_res();
     }
 }
