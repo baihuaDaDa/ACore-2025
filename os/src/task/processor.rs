@@ -3,6 +3,7 @@ use lazy_static::*;
 use crate::sync::UPSafeCell;
 use crate::task::{TaskContext, TaskControlBlock, TaskStatus};
 use crate::task::manager::fetch_task;
+use crate::task::process::ProcessControlBlock;
 use crate::task::switch::__switch;
 use crate::trap::TrapContext;
 
@@ -46,14 +47,31 @@ pub fn current_task() -> Option<Arc<TaskControlBlock>> {
     PROCESSOR.exclusive_access().current()
 }
 
+pub fn current_process() -> Arc<ProcessControlBlock> {
+    current_task().unwrap().process.upgrade().unwrap()
+}
+
 pub fn current_user_token() -> usize {
-    current_task().unwrap().inner_exclusive_access().get_user_token()
+    current_task().unwrap().get_user_token()
 }
 
 pub fn current_trap_cx() -> &'static mut TrapContext {
     current_task().unwrap().inner_exclusive_access().get_trap_cx()
 }
 
+pub fn current_trap_cx_user_va() -> usize {
+    current_task()
+        .unwrap()
+        .inner_exclusive_access()
+        .res
+        .as_ref()
+        .unwrap()
+        .trap_cx_user_va()
+}
+
+pub fn current_kstack_top() -> usize {
+    current_task().unwrap().kstack.get_top()
+}
 
 pub fn run_tasks() {
     loop {
@@ -75,6 +93,8 @@ pub fn run_tasks() {
                     next_task_cx_ptr,
                 );
             }
+        } else {
+            println!("no tasks available in run_tasks");
         }
     }
 }

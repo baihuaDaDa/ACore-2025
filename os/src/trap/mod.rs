@@ -6,7 +6,7 @@ use crate::task::{check_signals_error_of_current, current_add_signal, current_tr
 mod context;
 
 pub use context::TrapContext;
-use crate::config::{TRAMPOLINE, TRAP_CONTEXT};
+use crate::config::{TRAMPOLINE, TRAP_CONTEXT_BASE};
 use crate::timer::set_next_trigger;
 
 global_asm!(include_str!("trap.S"));
@@ -44,7 +44,7 @@ pub fn trap_from_kernel() -> ! {
 #[unsafe(no_mangle)]
 pub fn trap_return() -> ! {
     set_user_trap_entry();
-    let trap_cx_ptr = TRAP_CONTEXT;
+    let trap_cx_ptr = TRAP_CONTEXT_BASE;
     let user_satp = current_user_token();
     unsafe extern "C" {
         fn __alltraps();
