@@ -43,7 +43,7 @@ ACore-2025
   - IPC
     - [x] Pipe
 - Synchronization primitives
-  - [ ] Mutex
+  - [x] Mutex
   - [ ] Conditional variables (Optional)
 - File system (Optional)
   - [ ] File/directory creation/deletion
