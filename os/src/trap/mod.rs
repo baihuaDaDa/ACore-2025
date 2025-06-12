@@ -7,7 +7,7 @@ mod context;
 
 pub use context::TrapContext;
 use crate::config::TRAMPOLINE;
-use crate::timer::set_next_trigger;
+use crate::timer::{check_timer, set_next_trigger};
 
 global_asm!(include_str!("trap.S"));
 
@@ -99,6 +99,7 @@ pub fn trap_handler() -> ! {
         }
         Trap::Interrupt(Interrupt::SupervisorTimer) => {
             // println!("[kernel] Timer interrupt!");
+            check_timer();
             set_next_trigger();
             suspend_current_and_run_next();
         }

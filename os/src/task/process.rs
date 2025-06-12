@@ -6,7 +6,7 @@ use core::cell::RefMut;
 use crate::config::USER_STACK_SIZE;
 use crate::fs::{File, Stderr, Stdin, Stdout};
 use crate::mm::{translated_refmut, MemorySet, KERNEL_SPACE};
-use crate::sync::UPSafeCell;
+use crate::sync::{Mutex, UPSafeCell};
 use crate::task::id::{pid_alloc, PidHandle, RecycleAllocator};
 use crate::task::{add_task, SignalActions, SignalFlags, TaskControlBlock};
 use crate::task::manager::insert_into_pid2process;
@@ -26,6 +26,7 @@ pub struct ProcessControlBlockInner {
     pub children: Vec<Arc<ProcessControlBlock>>,
     pub exit_code: i32,
     pub fd_table: Vec<Option<Arc<dyn File + Send + Sync>>>,
+    pub mutex_list: Vec<Option<Arc<dyn Mutex>>>,
     pub base_size: usize,
     pub signals: SignalFlags,
     pub signal_mask: SignalFlags,
@@ -72,6 +73,7 @@ impl ProcessControlBlock {
                         // 2 -> stderr
                         Some(Arc::new(Stderr)),
                     ],
+                    mutex_list: Vec::new(),
                     signals: SignalFlags::empty(),
                     signal_mask: SignalFlags::empty(),
                     handling_sig: -1,
@@ -144,6 +146,7 @@ impl ProcessControlBlock {
                     children: Vec::new(),
                     exit_code: 0,
                     fd_table: new_fd_table,
+                    mutex_list: Vec::new(),
                     signals: SignalFlags::empty(),
                     // inherit the signal_mask and signal_actions
                     signal_mask: parent_inner.signal_mask,

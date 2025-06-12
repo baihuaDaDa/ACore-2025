@@ -14,7 +14,7 @@ use lazy_static::*;
 pub use context::TaskContext;
 pub use task::{TaskControlBlock, TaskStatus};
 pub use processor::{run_tasks, schedule, take_current_task, current_task, current_user_token, current_trap_cx, current_process, current_trap_cx_user_va, current_kstack_top};
-pub use manager::{add_task, pid2process, remove_from_pid2process};
+pub use manager::{add_task, wakeup_task, pid2process, remove_from_pid2process};
 pub use signal::{MAX_SIG, SignalFlags};
 pub use action::{SignalAction, SignalActions};
 use crate::config::INIT_PROC;
@@ -23,6 +23,7 @@ use crate::sbi::shutdown;
 use crate::task::id::TaskUserRes;
 use crate::task::manager::remove_task;
 use crate::task::process::ProcessControlBlock;
+use crate::timer::remove_timer;
 
 lazy_static! {
     pub static ref INITPROC: Arc<ProcessControlBlock> = {
@@ -45,10 +46,25 @@ pub fn suspend_current_and_run_next() {
     // change status to Ready
     task_inner.task_status = TaskStatus::Ready;
     drop(task_inner);
-    // stop exclusively accessing current PCB
+    // stop exclusively accessing current TCB
     // push back to ready queue
     add_task(task);
-    // jump tp scheduling cycle
+    // jump to scheduling cycle
+    schedule(task_cx_ptr);
+}
+
+pub fn block_current_and_run_next() {
+    // There must be an application running
+    let task = take_current_task().unwrap();
+    // access current TCB exclusively
+    let mut task_inner = task.inner_exclusive_access();
+    let task_cx_ptr = &mut task_inner.task_cx as *mut TaskContext;
+    // change status to Ready
+    task_inner.task_status = TaskStatus::Blocked;
+    drop(task_inner);
+    // stop exclusively accessing current TCB
+    // do not push back to ready queue
+    // jump to scheduling cycle
     schedule(task_cx_ptr);
 }
 
@@ -99,7 +115,7 @@ pub fn exit_current_and_run_next(exit_code: i32) {
         let mut recycle_res = Vec::<TaskUserRes>::new();
         for task in process_inner.tasks.iter().filter(|t| t.is_some()) {
             let task = task.as_ref().unwrap();
-            remove_task(Arc::clone(&task));
+            remove_inactive_task(Arc::clone(&task));
             let mut task_inner = task.inner_exclusive_access();
             if let Some(res) = task_inner.res.take() {
                 recycle_res.push(res);
@@ -122,6 +138,11 @@ pub fn exit_current_and_run_next(exit_code: i32) {
     // we do not have to save task context
     let mut _unused = TaskContext::zero_init();
     schedule(&mut _unused as *mut _);
+}
+
+fn remove_inactive_task(task: Arc<TaskControlBlock>) {
+    remove_task(Arc::clone(&task));
+    remove_timer(Arc::clone(&task));
 }
 
 pub fn check_signals_error_of_current() -> Option<(i32, &'static str)> {
