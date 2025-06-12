@@ -171,6 +171,9 @@ pub fn pipe(pipe_fd: &mut [usize]) -> isize { sys_pipe(pipe_fd) }
 pub fn read(fd: usize, buf: &mut [u8]) -> isize { sys_read(fd, buf) }
 pub fn write(fd: usize, buf: &[u8]) -> isize { sys_write(fd, buf) }
 pub fn exit(exit_code: i32) -> ! { sys_exit(exit_code); }
+pub fn sleep(ms: usize) {
+    sys_sleep(ms);
+}
 pub fn yield_() -> isize { sys_yield() }
 pub fn kill(pid: usize, signum: i32) -> isize { sys_kill(pid, signum) }
 pub fn sigaction(
@@ -206,21 +209,12 @@ pub fn waitpid(pid: usize, exit_code: &mut i32) -> isize {
         }
     }
 }
-pub fn sleep(period_ms: usize) {
-    let start = sys_get_time();
-    while sys_get_time() < start + period_ms as isize {
-        sys_yield();
-    }
-}
-
 pub fn thread_create(entry: usize, arg: usize) -> isize {
     sys_thread_create(entry, arg)
 }
-
 pub fn gettid() -> isize {
     sys_gettid()
 }
-
 pub fn waittid(tid: usize) -> isize { // 与 waitpid 不同，返回 exit_code 而不是 exit_tid
     loop {
         match sys_waittid(tid) {
@@ -228,4 +222,13 @@ pub fn waittid(tid: usize) -> isize { // 与 waitpid 不同，返回 exit_code �
             exit_code => return exit_code,
         }
     }
+}
+pub fn mutex_create() -> isize {
+    sys_mutex_create()
+}
+pub fn mutex_lock(mutex_id: usize) -> isize {
+    sys_mutex_lock(mutex_id)
+}
+pub fn mutex_unlock(mutex_id: usize) -> isize {
+    sys_mutex_unlock(mutex_id)
 }
