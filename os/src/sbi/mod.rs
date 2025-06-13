@@ -6,10 +6,13 @@ mod mtime;
 
 use power_off::power_off;
 use uart::UART;
-use mtime::sbi_set_timer;
 
-pub fn init() {
+pub fn init_uart() {
     UART.exclusive_access().init();
+}
+
+pub fn init_timer() {
+    mtime::init_timer();
 }
 
 pub fn console_putchar(c: u8) {
@@ -22,8 +25,4 @@ pub fn console_getchar() -> u8 {
 
 pub fn shutdown(failure: bool) -> ! {
     power_off(failure)
-}
-
-pub fn set_timer(timer: usize) {
-    sbi_set_timer(timer as _);
 }

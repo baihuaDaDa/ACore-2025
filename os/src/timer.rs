@@ -4,11 +4,9 @@ use core::cmp::Ordering;
 use lazy_static::lazy_static;
 use riscv::register::time;
 use crate::config::CLOCK_FREQ;
-use crate::sbi::set_timer;
 use crate::sync::UPSafeCell;
 use crate::task::{wakeup_task, TaskControlBlock};
 
-const TICKS_PER_SEC: usize = 100;
 const MICRO_PRO_SEC: usize = 1000;
 
 pub fn get_time() -> usize {
@@ -17,10 +15,6 @@ pub fn get_time() -> usize {
 
 pub fn get_time_ms() -> usize {
     get_time() * MICRO_PRO_SEC / CLOCK_FREQ
-}
-
-pub fn set_next_trigger() {
-    set_timer(get_time() + CLOCK_FREQ / TICKS_PER_SEC);
 }
 
 pub struct TimerCondVar {
@@ -61,9 +55,9 @@ pub fn add_timer(expire_ms: usize, task: Arc<TaskControlBlock>) {
 pub fn remove_timer(task: Arc<TaskControlBlock>) {
     let mut timers = TIMERS.exclusive_access();
     let mut tmp: BinaryHeap<TimerCondVar> = BinaryHeap::new();
-    for condVar in timers.drain() {
-        if Arc::as_ptr(&condVar.task) != Arc::as_ptr(&task) {
-            tmp.push(condVar);
+    for cond_var in timers.drain() {
+        if Arc::as_ptr(&cond_var.task) != Arc::as_ptr(&task) {
+            tmp.push(cond_var);
         }
     }
     *timers = tmp;

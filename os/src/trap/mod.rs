@@ -1,5 +1,5 @@
 use core::arch::{asm, global_asm};
-use riscv::register::{mtvec::TrapMode, scause::{self, Exception, Interrupt, Trap}, sie, stval, stvec};
+use riscv::register::{mtvec::TrapMode, scause::{self, Exception, Interrupt, Trap}, sstatus, sie, stval, stvec};
 use crate::syscall::syscall;
 use crate::task::{check_signals_error_of_current, current_add_signal, current_trap_cx, current_trap_cx_user_va, current_user_token, exit_current_and_run_next, handle_signals, suspend_current_and_run_next, SignalFlags};
 
@@ -7,20 +7,17 @@ mod context;
 
 pub use context::TrapContext;
 use crate::config::TRAMPOLINE;
-use crate::timer::{check_timer, set_next_trigger};
+use crate::timer::check_timer;
 
 global_asm!(include_str!("trap.S"));
 
 pub fn init() {
     unsafe {
         stvec::write(TRAMPOLINE, TrapMode::Direct);
-    }
-}
-
-pub fn enable_timer_interrupt() {
-    unsafe {
+        sstatus::set_sie();
         sie::set_stimer();
-        // sstatus::set_sie();
+        sie::set_sext();
+        sie::set_ssoft();
     }
 }
 
@@ -100,7 +97,6 @@ pub fn trap_handler() -> ! {
         Trap::Interrupt(Interrupt::SupervisorTimer) => {
             // println!("[kernel] Timer interrupt!");
             check_timer();
-            set_next_trigger();
             suspend_current_and_run_next();
         }
         _ => {

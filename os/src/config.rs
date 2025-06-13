@@ -11,6 +11,9 @@ pub const CLOCK_FREQ: usize = 403000000 / 62;
 pub const CLOCK_FREQ: usize = 12500000;
 */
 pub use crate::board::*;
+
+pub const TICKS_PER_SEC: usize = 100;
+
 pub const UART_DIVISOR: u16 = 3;
 
 pub const PAGE_SIZE: usize = 4096;

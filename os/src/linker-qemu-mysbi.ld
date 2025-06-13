@@ -10,6 +10,7 @@ SECTIONS
     stext = .;
     .text : {
         *(.text.entry)
+        *(.text.time)
         . = ALIGN(4K);
         strampoline = .;
         *(.text.trampoline)

@@ -1,43 +1,28 @@
+use core::arch::global_asm;
 use core::ptr::{read_volatile, write_volatile};
-use crate::config::{MMIO_CLINT_BASE, MTIME_OFFSET, MTIMECMP_OFFSET};
-use riscv::register::{mie, mip, mhartid, mtvec, mstatus};
+use crate::config::{MMIO_CLINT_BASE, MTIME_OFFSET, MTIMECMP_OFFSET, CORE_NUM, CLOCK_FREQ, TICKS_PER_SEC};
+use riscv::register::{mie, mip, mhartid, mtvec, mstatus, mscratch};
+
+global_asm!(include_str!("time.S"));
+
+/// 0,1,2: for callee save
+/// 3: for mtimecmp addr
+/// 4: for time interval
+#[unsafe(link_section = ".bss.stack")]
+pub static mut M_TIME_SCRATCH: [[usize; 5]; CORE_NUM] = [[0; 5]; CORE_NUM];
 
 pub fn init_timer() {
-    unsafe { 
-        mtvec::write(m_timer_interrupt as usize, mtvec::TrapMode::Direct); // set M-mode trap handler
-        mstatus::set_mie(); // enable M-mode interrupt
+    unsafe extern "C" {
+        fn __time_handler();
     }
-}
-
-#[repr(C)]
-pub struct SbiRet {
-    pub error: usize,
-    pub value: usize,
-}
-
-impl SbiRet {
-    pub fn success(value: usize) -> Self {
-        Self { error: 0, value }
-    }
-}
-
-pub fn sbi_set_timer(stime_value: u64) -> SbiRet {
     let hart_id = mhartid::read();
-    // set mtimecmp
     unsafe {
-        mie::clear_mtimer(); // disable M-mode timer interrupt
-        let mtimecmp_addr = (MMIO_CLINT_BASE + MTIMECMP_OFFSET + 8 * hart_id) as *mut u64;
-        write_volatile(mtimecmp_addr, stime_value);
-        mip::clear_stimer(); // clear S-mode timer interrupt pending
-        mie::set_mtimer(); // enable M-mode timer interrupt
-    }
-    SbiRet::success(0)
-}
-
-#[unsafe(no_mangle)]
-pub extern "C" fn m_timer_interrupt() {
-    unsafe {
-        mip::set_stimer(); // forward the M-mode timer interrupt to S-mode
-        mie::clear_mtimer(); // disable M-mode timer interrupt until the next timer interrupt
+        mtvec::write(__time_handler as usize, mtvec::TrapMode::Direct); // set M-mode trap handler
+        let scratch = &mut M_TIME_SCRATCH[hart_id];
+        scratch[3] = (MMIO_CLINT_BASE + MTIMECMP_OFFSET + 8 * hart_id) as usize; // set mtimecmp addr
+        scratch[4] = CLOCK_FREQ / TICKS_PER_SEC; // set time interval
+        mscratch::write(scratch.as_mut_ptr() as usize); // set mscratch to point to M_TIME_SCRATCH[hart_id]
+        mstatus::set_mie(); // enable M-mode interrupt
+        mie::set_mtimer(); // enable machine timer interrupt
     }
 }
