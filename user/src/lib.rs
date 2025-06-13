@@ -45,7 +45,7 @@ use core::ptr::addr_of_mut;
 use bitflags::bitflags;
 use buddy_allocator::LockedBuddyAllocator;
 
-const USER_HEAP_SIZE: usize = 16384;
+const USER_HEAP_SIZE: usize = 32768;
 
 static mut USER_HEAP_SPACE: [u8; USER_HEAP_SIZE] = [0; USER_HEAP_SIZE];
 
@@ -209,6 +209,9 @@ pub fn waitpid(pid: usize, exit_code: &mut i32) -> isize {
         }
     }
 }
+pub fn waitpid_not_spin(pid: usize, exit_code: &mut i32) -> isize {
+    sys_waitpid(pid as isize, exit_code as *mut _)
+}
 pub fn thread_create(entry: usize, arg: usize) -> isize {
     sys_thread_create(entry, arg)
 }
@@ -241,5 +244,20 @@ macro_rules! vload {
     ($var: expr) => {
         // unsafe { core::intrinsics::volatile_load($var_ref as *const _ as _) }
         unsafe { core::ptr::read_volatile(core::ptr::addr_of!($var)) }
+    };
+}
+
+#[macro_export]
+macro_rules! vstore {
+    ($var: expr, $value: expr) => {
+        // unsafe { core::intrinsics::volatile_store($var_ref as *mut _ as _, $value) }
+        unsafe { core::ptr::write_volatile(core::ptr::addr_of_mut!($var), $value) }
+    };
+}
+
+#[macro_export]
+macro_rules! memory_fence {
+    () => {
+        core::sync::atomic::fence(core::sync::atomic::Ordering::SeqCst)
     };
 }
