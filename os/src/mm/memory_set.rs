@@ -191,47 +191,48 @@ impl MemorySet {
         // map trampoline
         memory_set.map_trampoline();
         // map kernel sections
-        println!(".text [{:#x}, {:#x})", stext as usize, etext as usize);
-        println!(".rodata [{:#x}, {:#x})", srodata as usize, erodata as usize);
-        println!(".data [{:#x}, {:#x})", sdata as usize, edata as usize);
-        println!(".bss [{:#x}, {:#x})", sbss_with_stack as usize, ebss as usize);
-        println!("mapping .text section");
+        println!("[kernel] .text [{:#x}, {:#x})", stext as usize, etext as usize);
+        println!("[kernel] .rodata [{:#x}, {:#x})", srodata as usize, erodata as usize);
+        println!("[kernel] .data [{:#x}, {:#x})", sdata as usize, edata as usize);
+        println!("[kernel] .bss [{:#x}, {:#x})", sbss_with_stack as usize, ebss as usize);
+        println!("[kernel] mapping .text section");
         memory_set.push(MapArea::new(
             (stext as usize).into(),
             (etext as usize).into(),
             MapType::Identical,
             MapPermission::R | MapPermission::X,
         ), None);
-        println!("mapping .rodata section");
+        println!("[kernel] mapping .rodata section");
         memory_set.push(MapArea::new(
             (srodata as usize).into(),
             (erodata as usize).into(),
             MapType::Identical,
             MapPermission::R,
         ), None);
-        println!("mapping .data section");
+        println!("[kernel] mapping .data section");
         memory_set.push(MapArea::new(
             (sdata as usize).into(),
             (edata as usize).into(),
             MapType::Identical,
             MapPermission::R | MapPermission::W,
         ), None);
-        println!("mapping .bss section");
+        println!("[kernel] mapping .bss section");
         memory_set.push(MapArea::new(
             (sbss_with_stack as usize).into(),
             (ebss as usize).into(),
             MapType::Identical,
             MapPermission::R | MapPermission::W,
         ), None);
-        println!("mapping physical memory");
+        println!("[kernel] mapping physical memory");
         memory_set.push(MapArea::new(
             (ekernel as usize).into(),
             MEMORY_END.into(),
             MapType::Identical,
             MapPermission::R | MapPermission::W,
         ), None);
-        println!("mapping memory-mapped registers");
+        println!("[kernel] mapping memory-mapped registers");
         for pair in MMIO_VIRT_IO {
+            println!("[kernel] - MMIO_VIRT_IO: {:?}", pair);
             memory_set.push(MapArea::new(
                 (*pair).0.into(),
                 ((*pair).0 + (*pair).1).into(),
@@ -239,6 +240,20 @@ impl MemorySet {
                 MapPermission::R | MapPermission::W,
             ), None);
         }
+        println!("[kernel] - MMIO_VIRT_UART: {:?}", MMIO_VIRT_UART);
+        memory_set.push(MapArea::new(
+            MMIO_VIRT_UART.0.into(),
+            (MMIO_VIRT_UART.0 + MMIO_VIRT_UART.1).into(),
+            MapType::Identical,
+            MapPermission::R | MapPermission::W,
+        ), None);
+        println!("[kernel] - MMIO_VIRT_TEST: {:?}", MMIO_VIRT_TEST);
+        memory_set.push(MapArea::new(
+            MMIO_VIRT_TEST.0.into(),
+            (MMIO_VIRT_TEST.0 + MMIO_VIRT_TEST.1).into(),
+            MapType::Identical,
+            MapPermission::R | MapPermission::W,
+        ), None);
         memory_set
     }
     

@@ -3,6 +3,7 @@ pub const MEMORY_END: usize = 0x8800_0000;
 pub const CORE_NUM: usize = 4;
 
 // MMIO
+/* --------- require mapping in kernel space --------*/
 // for peripherals
 pub const MMIO_VIRT_IO: &[(usize, usize)] = &[
     (0x1000_1000, 0x1000),
@@ -11,6 +12,7 @@ pub const MMIO_VIRT_IO: &[(usize, usize)] = &[
 pub const MMIO_VIRT_UART: (usize, usize) = (0x1000_0000, 0x100);
 // for shutdown
 pub const MMIO_VIRT_TEST: (usize, usize) = (0x10_0000, 0x1000);
+/* ------------------------------------------------- */
 // for timer
 pub const MMIO_CLINT_BASE: usize = 0x2000000;
 pub const MTIME_OFFSET: usize = 0xBFF8;
