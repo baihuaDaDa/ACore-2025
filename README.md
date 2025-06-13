@@ -3,6 +3,9 @@ ACore-2025
 
 ## Overview
 
+ACore-2025 is a simple 64-bit RISC-V operating system kernel written in Rust, designed for educational purposes (final lab for CS2952).
+It aims to provide a basic understanding of operating system concepts such as process management, memory management, and inter-process communication.
+
 ## TODO
 
 - Bootloader
