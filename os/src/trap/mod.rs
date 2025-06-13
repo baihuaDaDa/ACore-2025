@@ -1,5 +1,5 @@
 use core::arch::{asm, global_asm};
-use riscv::register::{mtvec::TrapMode, scause::{self, Exception, Interrupt, Trap}, sstatus, sie, stval, stvec};
+use riscv::register::{mtvec::TrapMode, scause::{self, Exception, Interrupt, Trap}, sie, stval, stvec, sip};
 use crate::syscall::syscall;
 use crate::task::{check_signals_error_of_current, current_add_signal, current_trap_cx, current_trap_cx_user_va, current_user_token, exit_current_and_run_next, handle_signals, suspend_current_and_run_next, SignalFlags};
 
@@ -14,7 +14,6 @@ global_asm!(include_str!("trap.S"));
 pub fn init() {
     unsafe {
         stvec::write(TRAMPOLINE, TrapMode::Direct);
-        sstatus::set_sie();
         sie::set_stimer();
         sie::set_sext();
         sie::set_ssoft();
@@ -94,8 +93,12 @@ pub fn trap_handler() -> ! {
             // exit_current_and_run_next(-3);
             current_add_signal(SignalFlags::SIGILL);
         }
-        Trap::Interrupt(Interrupt::SupervisorTimer) => {
-            // println!("[kernel] Timer interrupt!");
+        Trap::Interrupt(Interrupt::SupervisorSoft) => {
+            // println!("[kernel] Timer interrupt! pid: {}", current_task().unwrap().get_process().getpid());
+            let sip = sip::read().bits();
+            unsafe {
+                asm! {"csrw sip, {sip}", sip = in(reg) sip ^ 2};
+            } // clear the Supervisor Software Interrupt bit
             check_timer();
             suspend_current_and_run_next();
         }

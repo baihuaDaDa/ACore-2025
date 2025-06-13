@@ -6,8 +6,8 @@ ACore-2025
 ## TODO
 
 - Bootloader
-  - [ ] Initialization
-  - [ ] Entering S mode for the kernel
+  - [x] Initialization
+  - [x] Entering S mode for the kernel
 - Allocator
   - [x] Buddy allocator
   - [x] Frame allocator (or any fine-grained allocator for any size of memory)
